@@ -22,9 +22,10 @@ export class MapaComponent implements AfterViewInit, OnDestroy {
 
   cities: MunicipioDto[] = []
   selectedCity?: MunicipioDto
-  private map!: L.Map;
+    private map!: L.Map;
   private markers = new Map<string, L.Marker>();
   private rutaSeleccionada?: L.Polyline;
+  private refresco?: ReturnType<typeof setInterval>;
 
   vehiculos: VehiculoDto[] = [];
 
@@ -70,6 +71,10 @@ export class MapaComponent implements AfterViewInit, OnDestroy {
     });
 
     this.loadVehiculos()
+
+    clearInterval(this.refresco)
+    this.refresco = setInterval(() => this.loadVehiculos(), 3000)
+  
   }
 
   mostrarRuta(vehiculo: VehiculoDto): void {
@@ -191,6 +196,7 @@ export class MapaComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    clearInterval(this.refresco)
     this.map?.remove();
   }
 }
