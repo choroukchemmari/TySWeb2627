@@ -13,4 +13,12 @@ public class EmailService {
         System.out.println("Enlace de confirmación con token: " + token);
         System.out.println("======================");
     }
+
+    public void enviarCuentaConfirmada(String correo) {
+        System.out.println("=== EMAIL SIMULADO ===");
+        System.out.println("Para: " + correo);
+        System.out.println("Asunto: Cuenta confirmada");
+        System.out.println("Tu cuenta se ha confirmado correctamente.");
+        System.out.println("======================");
+    }
 }

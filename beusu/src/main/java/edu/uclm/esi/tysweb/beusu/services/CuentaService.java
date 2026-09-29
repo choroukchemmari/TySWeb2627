@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,9 @@ public class CuentaService {
     @Autowired
     private EmailService emailService;
 
+    @Value("${beusu.token.minutos-caducidad}")
+    private long minutosCaducidad;
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public void registrar(RegistroRequest request) {
@@ -36,15 +40,12 @@ public class CuentaService {
 
         if (existente != null) {
             if (existente.isActiva())
-                // Escenario alternativo 2: ya tiene cuenta activa
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una cuenta activa con ese correo");
 
-            // Escenario alternativo 1: cuenta creada pero no activa -> se elimina y se repite el alta
             this.dao.delete(existente);
         }
 
         if (!this.ideeClient.existeMunicipio(request.municipio()))
-            // Escenario alternativo 3: el municipio no existe
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No existe el municipio " + request.municipio());
 
         Cuenta cuenta = new Cuenta();
@@ -64,5 +65,26 @@ public class CuentaService {
         this.dao.save(cuenta);
 
         this.emailService.enviarConfirmacionRegistro(cuenta.getCorreo(), token);
+    }
+
+    public void confirmar(String token) {
+
+        Cuenta cuenta = this.dao.findByToken(token);
+
+        if (cuenta == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Token no válido");
+
+        if (cuenta.isActiva())
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "La cuenta ya está confirmada");
+
+        LocalDateTime caducidad = cuenta.getFechaCreacionToken().plusMinutes(this.minutosCaducidad);
+
+        if (LocalDateTime.now().isAfter(caducidad))
+            throw new ResponseStatusException(HttpStatus.GONE, "El token ha caducado, vuelve a registrarte");
+
+        cuenta.setFechaValidacion(LocalDateTime.now());
+        this.dao.save(cuenta);
+
+        this.emailService.enviarCuentaConfirmada(cuenta.getCorreo());
     }
 }
