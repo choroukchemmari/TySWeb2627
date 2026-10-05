@@ -31,19 +31,16 @@ public class VehiculoService {
     }
 
     public void asignarVehiculos(String nombreMunicipio, Integer cantidad) {
-        if (cantidad == null || cantidad <= 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La cantidad debe ser mayor que cero");
-
         Municipio municipio = this.municipioDao.findByName(nombreMunicipio);
         if (municipio == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No existe el municipio " + nombreMunicipio);
 
-        List<Vehiculo> libres = this.dao.findByMunicipioIsNull();
-        if (cantidad > libres.size())
+        Integer libres = this.dao.countByMunicipioIdIsNull();
+        if (cantidad > libres)
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Solo hay " + libres.size() + " vehículos sin asignar");
+                    "Solo hay " + libres + " vehículos sin asignar");
 
-        List<Vehiculo> aAsignar = libres.subList(0, cantidad);
+        List<Vehiculo> aAsignar = this.dao.getBicisLibres(municipio, cantidad);
         for (Vehiculo vehiculo : aAsignar)
             vehiculo.setMunicipio(municipio);
         this.dao.saveAll(aAsignar);
