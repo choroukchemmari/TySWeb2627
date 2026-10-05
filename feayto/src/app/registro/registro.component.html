@@ -1,0 +1,59 @@
+<h2>Registro de cuenta</h2>
+
+<form [formGroup]="form" (ngSubmit)="registrar()">
+
+  <div>
+    <label>Nombre:</label>
+    <input type="text" formControlName="nombre"
+           [class.invalid]="form.get('nombre')?.invalid && form.get('nombre')?.touched">
+  </div>
+
+  <div>
+    <label>Apellidos:</label>
+    <input type="text" formControlName="apellidos"
+           [class.invalid]="form.get('apellidos')?.invalid && form.get('apellidos')?.touched">
+  </div>
+
+  <div>
+    <label>Correo:</label>
+    <input type="email" formControlName="correo"
+           [class.invalid]="form.get('correo')?.invalid && form.get('correo')?.touched">
+  </div>
+
+  <div>
+    <label>Municipio:</label>
+    <input type="text" formControlName="municipio"
+           [class.invalid]="form.get('municipio')?.invalid && form.get('municipio')?.touched">
+  </div>
+
+  <div>
+    <label>Latitud:</label>
+    <input type="number" formControlName="latitud"
+           [class.invalid]="form.get('latitud')?.invalid && form.get('latitud')?.touched">
+  </div>
+
+  <div>
+    <label>Longitud:</label>
+    <input type="number" formControlName="longitud"
+           [class.invalid]="form.get('longitud')?.invalid && form.get('longitud')?.touched">
+  </div>
+
+  <div>
+    <label>Contraseña:</label>
+    <input type="password" formControlName="password"
+           [class.invalid]="form.get('password')?.invalid && form.get('password')?.touched">
+  </div>
+
+  <div>
+    <label>Confirmar contraseña:</label>
+    <input type="password" formControlName="confirmacionPassword"
+           [class.invalid]="form.get('confirmacionPassword')?.invalid && form.get('confirmacionPassword')?.touched">
+  </div>
+
+  @if (form.errors?.['passwordsDistintas'] && form.get('confirmacionPassword')?.touched) {
+    <p class="error">Las contraseñas no coinciden</p>
+  }
+
+  <button type="submit">Registrarme</button>
+
+</form>
