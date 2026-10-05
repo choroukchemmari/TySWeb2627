@@ -45,8 +45,7 @@ public class CuentaService {
             this.dao.delete(existente);
         }
 
-        if (!this.ideeClient.existeMunicipio(request.municipio()))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No existe el municipio " + request.municipio());
+if (!this.ideeClient.existe(request.municipio()))            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No existe el municipio " + request.municipio());
 
         Cuenta cuenta = new Cuenta();
         cuenta.setNombre(request.nombre());
