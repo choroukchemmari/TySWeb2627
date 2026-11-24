@@ -128,7 +128,11 @@ public class CuentaService {
         return new LoginResponse(tokenSesion, cuenta.getNombre(), cuenta.getApellidos(), cuenta.getCorreo());
     }
 
-    public SesionDto validateSession(String tokenSesion) {
+       public SesionDto validateSession(String tokenSesion) {
+
+        // Sin token no hay sesión (si no, findByTokenSesion(null) casaría con cuentas sin sesión)
+        if (tokenSesion == null || tokenSesion.isBlank())
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Falta el token de sesión");
 
         Cuenta cuenta = this.dao.findByTokenSesion(tokenSesion);
 
