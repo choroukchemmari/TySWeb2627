@@ -1,0 +1,25 @@
+@if (usuario$ | async; as usuario) {
+  <p>
+    Hola, {{ usuario.nombre }}
+    <button type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+  </p>
+  <p>Municipio: {{ usuario.municipio }}</p>
+}
+
+<h1>Opciones</h1>
+
+<ol>
+  <li><button type="button" (click)="select(1)">Crear vehículos</button></li>
+  <li><button type="button" (click)="select(2)">Ubicar estaciones</button></li>
+  <li><button type="button" (click)="select(3)">Gestionar estación</button></li>
+  <li><button type="button" (click)="select(4)">Gestionar vehículos</button></li>
+  <li><button type="button" (click)="select(5)">Gestionar tráfico</button></li>
+</ol>
+
+@if (selectedOption == 1) {
+  <app-crear-vehiculos></app-crear-vehiculos>
+}
+
+@if (selectedOption == 5) {
+  <app-mapa></app-mapa>
+}

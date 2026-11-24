@@ -1,42 +1,47 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { UsuarioService } from '../services/usuario.service';
 import { LoginRequest } from '../model/LoginRequest';
-import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
 
   private usuarioService = inject(UsuarioService);
+  private router = inject(Router);
+  private fb = inject(FormBuilder);
 
-  correo = '';
-  password = '';
+  form = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+    pwd: ['', Validators.required]
+  });
+
   mensajeError = '';
-  mensajeExito = '';
   cargando = false;
 
   login() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
     this.mensajeError = '';
-    this.mensajeExito = '';
     this.cargando = true;
 
-    const request: LoginRequest = {
-      correo: this.correo,
-      password: this.password
-    };
+    const { email, pwd } = this.form.getRawValue();
+    const request: LoginRequest = { correo: email, password: pwd };
 
     this.usuarioService.login(request).subscribe({
-      next: (respuesta) => {
+      next: () => {
         this.cargando = false;
-        sessionStorage.setItem('tokenSesion', respuesta.token);
-        this.mensajeExito = `¡Hola ${respuesta.nombre}, has entrado correctamente!`;
+        this.router.navigate(['/menu']);
       },
       error: (error: HttpErrorResponse) => {
         this.cargando = false;
