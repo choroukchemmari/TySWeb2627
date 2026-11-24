@@ -55,8 +55,9 @@ public class MunicipioService {
         for (FeatureDto dto : features) {
             Feature feature = new Feature();
             feature.setIdeeId(dto.id());
-            feature.setLatitude(dto.geometry().coordinates().get(0));
-            feature.setLongitude(dto.geometry().coordinates().get(1));
+                       // idee.es (GeoJSON) devuelve [longitud, latitud]
+            feature.setLongitude(dto.geometry().coordinates().get(0));
+            feature.setLatitude(dto.geometry().coordinates().get(1));
             feature.setMunicipio(municipio);
             feature.setName(dto.properties().componentThoroughfareName());
             feature.setNumber(dto.properties().locatorDesignatorAddressNumber());
