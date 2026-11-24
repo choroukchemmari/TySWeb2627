@@ -7,12 +7,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import edu.uclm.esi.tysweb.bealquileres.dto.AsignarVehiculoRequestDto;
+import edu.uclm.esi.tysweb.bealquileres.dto.SesionDto;
 import edu.uclm.esi.tysweb.bealquileres.dto.VehiculoDto;
 import edu.uclm.esi.tysweb.bealquileres.services.VehiculoService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,14 +40,19 @@ public class VehiculoController {
     }
 
     @PostMapping("/asignarVehiculos")
-    public void asignarVehiculos(@RequestBody AsignarVehiculoRequestDto request) {
-        if (request.municipio() == null || request.cantidad() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tienes que indicar municipio y cantidad");
+    public void asignarVehiculos(@RequestBody AsignarVehiculoRequestDto request,
+                                 @RequestAttribute("sesion") SesionDto sesion) {
+
+        if (request.cantidad() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tienes que indicar la cantidad");
+
+        if (request.municipio() != null && !request.municipio().equalsIgnoreCase(sesion.municipio()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Solo puedes asignar vehículos a tu propio municipio");
 
         if (request.cantidad() < 1 || request.cantidad() > 100)
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "La cantidad tiene que estar entre 1 y 100");
 
-        this.service.asignarVehiculos(request.municipio(), request.cantidad());
+        this.service.asignarVehiculos(sesion.municipio(), request.cantidad());
     }
 
     @GetMapping("/getVehiculos")
