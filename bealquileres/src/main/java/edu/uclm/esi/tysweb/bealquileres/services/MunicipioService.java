@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import edu.uclm.esi.tysweb.bealquileres.dao.FeatureDao;
 import edu.uclm.esi.tysweb.bealquileres.dao.MunicipioDao;
@@ -29,9 +31,18 @@ public class MunicipioService {
     }
 
     public void load(String name, Integer offset, Integer limit, Boolean progress) {
-        List<FeatureDto> features = cartoCiudadClient.load(name, offset, limit);
+
+        boolean mostrarProgreso = Boolean.TRUE.equals(progress);
+
         Municipio municipio = this.dao.findByName(name);
-        if (municipio==null) {
+
+        // Escenario alternativo 2: el municipio ya está cargado
+        if (municipio != null && this.featureDao.existsByMunicipio(municipio))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El municipio ya está cargado");
+
+        List<FeatureDto> features = cartoCiudadClient.load(name, offset, limit);
+
+        if (municipio == null) {
             municipio = new Municipio();
             municipio.setName(name);
             this.dao.save(municipio);
@@ -55,7 +66,7 @@ public class MunicipioService {
             batch.add(feature);
             if (batch.size()==BATCH_SIZE) {
                 this.featureDao.saveAllAndFlush(batch);
-                if (progress)
+                if (mostrarProgreso)
                     this.sseService.send(name, "progress", processed);
                 batch.clear();
             }
@@ -64,7 +75,7 @@ public class MunicipioService {
         if (!batch.isEmpty())
             this.featureDao.saveAllAndFlush(batch);
 
-        if (progress)
+        if (mostrarProgreso)
             this.sseService.send(name, "completed", processed);
 
         System.out.println("Terminado: " + processed);
