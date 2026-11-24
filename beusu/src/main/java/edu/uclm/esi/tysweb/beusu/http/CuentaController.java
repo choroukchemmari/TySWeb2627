@@ -9,12 +9,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.view.RedirectView;
 
 import edu.uclm.esi.tysweb.beusu.dto.LoginRequest;
 import edu.uclm.esi.tysweb.beusu.dto.LoginResponse;
+import edu.uclm.esi.tysweb.beusu.dto.NuevaPasswordRequest;
 import edu.uclm.esi.tysweb.beusu.dto.RegistroRequest;
 import edu.uclm.esi.tysweb.beusu.dto.SesionDto;
+import edu.uclm.esi.tysweb.beusu.dto.SolicitarPasswordRequest;
 import edu.uclm.esi.tysweb.beusu.services.CuentaService;
 
 @RestController
@@ -52,5 +55,27 @@ public class CuentaController {
     @PostMapping("/logout")
     public void logout(@RequestParam String sessionToken) {
         this.service.logout(sessionToken);
+    }
+
+    // Responde igual exista o no el correo (RC-SEC-03)
+    @PostMapping("/solicitarNuevaPassword")
+    public void solicitarNuevaPassword(@RequestBody SolicitarPasswordRequest request) {
+        this.service.solicitarNuevaPassword(request.correo());
+    }
+
+    // Enlace del correo: valida el token y redirige a la página de feayto
+    @GetMapping("/nuevaPassword")
+    public RedirectView nuevaPassword(@RequestParam(required = false) String token) {
+        try {
+            this.service.validarTokenRecuperacion(token);
+            return new RedirectView(this.feaytoUrl + "/nueva-password?token=" + token);
+        } catch (ResponseStatusException e) {
+            return new RedirectView(this.feaytoUrl + "/nueva-password?error=1");
+        }
+    }
+
+    @PostMapping("/nuevaPassword")
+    public void crearNuevaPassword(@RequestBody NuevaPasswordRequest request) {
+        this.service.crearNuevaPassword(request);
     }
 }

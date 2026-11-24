@@ -31,6 +31,10 @@ public class Cuenta {
     private String tokenSesion;
     private LocalDateTime horaTokenSesion;
 
+    @Column(length = 36, unique = true)
+    private String tokenRecuperacion;
+    private LocalDateTime fechaTokenRecuperacion;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -71,4 +75,10 @@ public class Cuenta {
 
     public LocalDateTime getHoraTokenSesion() { return horaTokenSesion; }
     public void setHoraTokenSesion(LocalDateTime horaTokenSesion) { this.horaTokenSesion = horaTokenSesion; }
+
+    public String getTokenRecuperacion() { return tokenRecuperacion; }
+    public void setTokenRecuperacion(String tokenRecuperacion) { this.tokenRecuperacion = tokenRecuperacion; }
+
+    public LocalDateTime getFechaTokenRecuperacion() { return fechaTokenRecuperacion; }
+    public void setFechaTokenRecuperacion(LocalDateTime fechaTokenRecuperacion) { this.fechaTokenRecuperacion = fechaTokenRecuperacion; }
 }

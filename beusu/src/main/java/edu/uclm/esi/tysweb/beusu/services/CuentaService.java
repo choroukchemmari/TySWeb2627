@@ -14,6 +14,7 @@ import edu.uclm.esi.tysweb.beusu.dao.CuentaDao;
 import edu.uclm.esi.tysweb.beusu.dao.IntentoLoginFallidoDao;
 import edu.uclm.esi.tysweb.beusu.dto.LoginRequest;
 import edu.uclm.esi.tysweb.beusu.dto.LoginResponse;
+import edu.uclm.esi.tysweb.beusu.dto.NuevaPasswordRequest;
 import edu.uclm.esi.tysweb.beusu.dto.RegistroRequest;
 import edu.uclm.esi.tysweb.beusu.dto.SesionDto;
 import edu.uclm.esi.tysweb.beusu.model.Cuenta;
@@ -39,6 +40,9 @@ public class CuentaService {
 
     @Value("${beusu.sesion.minutos-caducidad}")
     private long minutosCaducidadSesion;
+
+    @Value("${beusu.recuperacion.minutos-caducidad}")
+    private long minutosCaducidadRecuperacion;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -148,6 +152,75 @@ public class CuentaService {
             cuenta.setTokenSesion(null);
             this.dao.save(cuenta);
         }
+    }
+
+    // ---------- Recuperación de contraseña ----------
+
+    public void solicitarNuevaPassword(String correo) {
+
+        Cuenta cuenta = (correo == null) ? null : this.dao.findByCorreo(correo);
+
+        // Si no existe o no está activa, no se hace nada: el controlador
+        // responde igual en todos los casos (RC-SEC-03, mensaje neutro)
+        if (cuenta == null || !cuenta.isActiva())
+            return;
+
+        // Al sobrescribir el token se invalida cualquier solicitud anterior
+        String token = UUID.randomUUID().toString();
+        cuenta.setTokenRecuperacion(token);
+        cuenta.setFechaTokenRecuperacion(LocalDateTime.now());
+        this.dao.save(cuenta);
+
+        this.emailService.enviarRecuperacionPassword(cuenta.getCorreo(), token);
+    }
+
+    public void validarTokenRecuperacion(String token) {
+        this.cuentaPorTokenRecuperacion(token);
+    }
+
+    public void crearNuevaPassword(NuevaPasswordRequest request) {
+
+        Cuenta cuenta = this.cuentaPorTokenRecuperacion(request.token());
+
+        if (request.password() == null || !request.password().equals(request.confirmacionPassword()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Las contraseñas no coinciden");
+
+        cuenta.setPassword(this.passwordEncoder.encode(request.password()));
+
+        // El token es de un solo uso (RC-SEC-04) y se cierran las sesiones abiertas
+        cuenta.setTokenRecuperacion(null);
+        cuenta.setFechaTokenRecuperacion(null);
+        cuenta.setTokenSesion(null);
+        this.dao.save(cuenta);
+
+        this.emailService.enviarPasswordCambiada(cuenta.getCorreo());
+    }
+
+    private Cuenta cuentaPorTokenRecuperacion(String token) {
+
+        // Mismo error si no existe o si ha caducado: no se revela cuál de los dos
+        ResponseStatusException invalido = new ResponseStatusException(
+                HttpStatus.GONE, "El enlace no es válido o ha caducado");
+
+        if (token == null || token.isBlank())
+            throw invalido;
+
+        Cuenta cuenta = this.dao.findByTokenRecuperacion(token);
+
+        if (cuenta == null)
+            throw invalido;
+
+        LocalDateTime caducidad = cuenta.getFechaTokenRecuperacion()
+                .plusMinutes(this.minutosCaducidadRecuperacion);
+
+        if (LocalDateTime.now().isAfter(caducidad)) {
+            cuenta.setTokenRecuperacion(null);
+            cuenta.setFechaTokenRecuperacion(null);
+            this.dao.save(cuenta);
+            throw invalido;
+        }
+
+        return cuenta;
     }
 
     private void registrarIntentoFallido(String correo, String motivo) {

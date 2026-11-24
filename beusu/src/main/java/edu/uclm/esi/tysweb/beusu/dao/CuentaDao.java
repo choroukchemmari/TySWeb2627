@@ -12,4 +12,6 @@ public interface CuentaDao extends JpaRepository<Cuenta, Long> {
 
     Cuenta findByTokenSesion(String tokenSesion);
 
+    Cuenta findByTokenRecuperacion(String tokenRecuperacion);
+
 }
