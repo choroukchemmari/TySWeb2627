@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import edu.uclm.esi.tysweb.bealquileres.dto.AsignarVehiculoRequestDto;
 import edu.uclm.esi.tysweb.bealquileres.dto.SesionDto;
+import edu.uclm.esi.tysweb.bealquileres.dto.UbicarBicicletasRequestDto;
 import edu.uclm.esi.tysweb.bealquileres.dto.VehiculoDto;
 import edu.uclm.esi.tysweb.bealquileres.services.VehiculoService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -53,6 +54,12 @@ public class VehiculoController {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "La cantidad tiene que estar entre 1 y 100");
 
         this.service.asignarVehiculos(sesion.municipio(), request.cantidad());
+    }
+
+    @PostMapping("/ubicar")
+    public void ubicar(@RequestBody UbicarBicicletasRequestDto request,
+                       @RequestAttribute("sesion") SesionDto sesion) {
+        this.service.ubicar(sesion.municipio(), request.estacionId(), request.vehiculoIds());
     }
 
     @GetMapping("/getVehiculos")

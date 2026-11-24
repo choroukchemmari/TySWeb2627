@@ -6,14 +6,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import edu.uclm.esi.tysweb.bealquileres.model.Estacion;
 import edu.uclm.esi.tysweb.bealquileres.model.Municipio;
 import edu.uclm.esi.tysweb.bealquileres.model.Vehiculo;
 
-public interface VehiculoDao extends JpaRepository<Vehiculo, String> {
+public interface VehiculoDao extends JpaRepository<Vehiculo, Long> {
 
     List<Vehiculo> findByMunicipioIsNull();
 
     Integer countByMunicipioIdIsNull();
+
+    long countByEstacion(Estacion estacion);
 
     @Query(value = "SELECT * FROM vehiculo WHERE municipio_id IS NULL LIMIT :cantidad", nativeQuery = true)
     List<Vehiculo> getBicisLibres(Municipio municipio, @Param("cantidad") Integer cantidad);

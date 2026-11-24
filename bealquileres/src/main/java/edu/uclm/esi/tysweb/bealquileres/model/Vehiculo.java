@@ -25,6 +25,11 @@ public class Vehiculo {
     @JoinColumn(name = "municipio_id", nullable = true)
     private Municipio municipio;
 
+    // Estación de recarga en la que está la bicicleta (null si no está en ninguna)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "estacion_id", nullable = true)
+    private Estacion estacion;
+
     public Long getId() {
         return id;
     }
@@ -83,5 +88,13 @@ public class Vehiculo {
 
     public void setMunicipio(Municipio municipio) {
         this.municipio = municipio;
+    }
+
+    public Estacion getEstacion() {
+        return estacion;
+    }
+
+    public void setEstacion(Estacion estacion) {
+        this.estacion = estacion;
     }
 }
