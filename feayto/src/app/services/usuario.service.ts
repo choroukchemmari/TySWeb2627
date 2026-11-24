@@ -42,6 +42,14 @@ export class UsuarioService {
     return this.http.post(`${this.urlUsuarios}/registrar`, request);
   }
 
+  solicitarNuevaPassword(correo: string) {
+    return this.http.post(`${this.urlUsuarios}/solicitarNuevaPassword`, { correo });
+  }
+
+  crearNuevaPassword(token: string, password: string, confirmacionPassword: string) {
+    return this.http.post(`${this.urlUsuarios}/nuevaPassword`, { token, password, confirmacionPassword });
+  }
+
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.urlUsuarios}/login`, request).pipe(
       tap(respuesta => {
