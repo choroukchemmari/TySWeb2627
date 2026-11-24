@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { UsuarioService } from '../services/usuario.service';
 import { RegistroRequest } from '../model/RegistroRequest';
 
@@ -12,13 +14,16 @@ function passwordsIgualesValidator(control: AbstractControl): ValidationErrors |
 @Component({
   selector: 'app-registro',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './registro.component.html',
   styleUrl: './registro.component.scss'
 })
 export class RegistroComponent {
 
   form: FormGroup;
+  cargando = false;
+  registroCorrecto = false;
+  mensajeError = '';
 
   constructor(private fb: FormBuilder, private service: UsuarioService) {
     this.form = this.fb.group({
@@ -38,15 +43,30 @@ export class RegistroComponent {
       this.form.markAllAsTouched();
       return;
     }
+
+    this.mensajeError = '';
+    this.cargando = true;
     const request: RegistroRequest = this.form.value;
-    this.service.registrar(request).subscribe(
-      ok => {
-        alert('Registro correcto. Revisa tu correo para confirmar la cuenta.');
+
+    this.service.registrar(request).subscribe({
+      next: () => {
+        this.cargando = false;
+        this.registroCorrecto = true;
         this.form.reset();
       },
-      error => {
-        alert(error.error.message ?? 'Error al registrar');
+      error: (error: HttpErrorResponse) => {
+        this.cargando = false;
+
+        if (error.status === 409) {
+          this.mensajeError = 'Ya existe una cuenta activa con ese correo.';
+        } else if (error.status === 404) {
+          this.mensajeError = 'El municipio indicado no existe.';
+        } else if (error.status === 400) {
+          this.mensajeError = 'Las contraseñas no coinciden.';
+        } else {
+          this.mensajeError = 'Ha ocurrido un error. Inténtalo de nuevo.';
+        }
       }
-    );
+    });
   }
 }
