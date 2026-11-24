@@ -1,5 +1,7 @@
 package edu.uclm.esi.tysweb.bealquileres.model;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -39,6 +41,13 @@ public class Vehiculo {
 
     @Column(length = 500)
     private String observaciones;
+
+    // Prerreserva de compra: mientras no caduque, la bicicleta no está libre.
+    // Cuando el pago se confirma, prerreservaExpira pasa a null y la asignación es definitiva.
+    @Column(length = 36)
+    private String reservaId;
+
+    private LocalDateTime prerreservaExpira;
 
     public Long getId() {
         return id;
@@ -123,5 +132,21 @@ public class Vehiculo {
 
     public void setObservaciones(String observaciones) {
         this.observaciones = observaciones;
+    }
+
+    public String getReservaId() {
+        return reservaId;
+    }
+
+    public void setReservaId(String reservaId) {
+        this.reservaId = reservaId;
+    }
+
+    public LocalDateTime getPrerreservaExpira() {
+        return prerreservaExpira;
+    }
+
+    public void setPrerreservaExpira(LocalDateTime prerreservaExpira) {
+        this.prerreservaExpira = prerreservaExpira;
     }
 }
