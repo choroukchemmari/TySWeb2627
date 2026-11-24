@@ -14,6 +14,7 @@
   <li><button type="button" (click)="select(3)">Gestionar estación</button></li>
   <li><button type="button" (click)="select(4)">Gestionar vehículos</button></li>
   <li><button type="button" (click)="select(5)">Gestionar tráfico</button></li>
+  <li><button type="button" (click)="select(6)">Comprar bicicletas</button></li>
 </ol>
 
 @if (selectedOption == 1) {
@@ -22,4 +23,8 @@
 
 @if (selectedOption == 5) {
   <app-mapa></app-mapa>
+}
+
+@if (selectedOption == 6) {
+  <app-comprar-bicicletas></app-comprar-bicicletas>
 }

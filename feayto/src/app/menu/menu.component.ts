@@ -3,11 +3,12 @@ import { AsyncPipe } from '@angular/common';
 import { UsuarioService } from '../services/usuario.service';
 import { MapaComponent } from '../mapa/mapa.component';
 import { CrearVehiculosComponent } from '../crear-vehiculos/crear-vehiculos.component';
+import { ComprarBicicletasComponent } from '../comprar-bicicletas/comprar-bicicletas.component';
 
 @Component({
   selector: 'app-menu',
   standalone: true,
-  imports: [AsyncPipe, MapaComponent, CrearVehiculosComponent],
+  imports: [AsyncPipe, MapaComponent, CrearVehiculosComponent, ComprarBicicletasComponent],
   templateUrl: './menu.component.html'
 })
 export class MenuComponent {

@@ -1,0 +1,24 @@
+<h2>Comprar bicicletas</h2>
+
+@if (!prerreserva) {
+  <label>
+    Número de bicicletas:
+    <input type="number" min="1" max="100" [(ngModel)]="cantidad" name="cantidad">
+  </label>
+  <button type="button" (click)="solicitar()" [disabled]="cargando || !cantidad">Ir al pago</button>
+} @else {
+  <p>
+    Prerreserva de {{ prerreserva.cantidad }} bicicleta(s) para {{ prerreserva.municipio }}.
+    Importe: <strong>{{ prerreserva.importe }} €</strong>.
+    Tiene hasta las {{ prerreserva.expira | date:'HH:mm' }} para pagar.
+  </p>
+
+  <div id="card-element"></div>
+
+  <button type="button" (click)="pagar()" [disabled]="pagando">Pagar {{ prerreserva.importe }} €</button>
+  <button type="button" (click)="cancelar()" [disabled]="pagando">Cancelar</button>
+}
+
+@if (mensaje) {
+  <p [class.error]="esError" [class.exito]="!esError">{{ mensaje }}</p>
+}
