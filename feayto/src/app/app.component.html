@@ -7,6 +7,7 @@
     <li (click)="select(4)">Gestionar vehículos</li>
     <li (click)="select(5)"><u>Gestionar tráfico</u></li>
     <li (click)="select(6)">Registro</li>
+    <li (click)="select(7)">Login</li>
 </ol>
 
 @if (selectedOption==1) {
@@ -19,4 +20,8 @@
 
 @if (selectedOption==6) {
 <app-registro></app-registro>
+}
+
+@if (selectedOption==7) {
+<app-login></app-login>
 }

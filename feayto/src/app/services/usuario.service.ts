@@ -1,6 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { RegistroRequest } from '../model/RegistroRequest';
+import { LoginRequest } from '../model/LoginRequest';
+import { LoginResponse } from '../model/LoginResponse';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -14,5 +16,9 @@ export class UsuarioService {
 
   registrar(request: RegistroRequest) {
     return this.http.post(`${this.urlUsuarios}/registrar`, request);
+  }
+
+  login(request: LoginRequest) {
+    return this.http.post<LoginResponse>(`${this.urlUsuarios}/login`, request);
   }
 }

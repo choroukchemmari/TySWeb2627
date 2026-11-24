@@ -2,6 +2,7 @@ package edu.uclm.esi.tysweb.beusu.model;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,6 +26,10 @@ public class Cuenta {
     private String token;
     private LocalDateTime fechaCreacionToken;
     private LocalDateTime fechaValidacion;
+
+    @Column(length = 36, unique = true)
+    private String tokenSesion;
+    private LocalDateTime horaTokenSesion;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -60,4 +65,10 @@ public class Cuenta {
     public void setFechaValidacion(LocalDateTime fechaValidacion) { this.fechaValidacion = fechaValidacion; }
 
     public boolean isActiva() { return fechaValidacion != null; }
+
+    public String getTokenSesion() { return tokenSesion; }
+    public void setTokenSesion(String tokenSesion) { this.tokenSesion = tokenSesion; }
+
+    public LocalDateTime getHoraTokenSesion() { return horaTokenSesion; }
+    public void setHoraTokenSesion(LocalDateTime horaTokenSesion) { this.horaTokenSesion = horaTokenSesion; }
 }

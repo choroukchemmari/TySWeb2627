@@ -3,11 +3,12 @@ import { RouterOutlet } from '@angular/router';
 import { MapaComponent } from "./mapa/mapa.component";
 import { CrearVehiculosComponent } from "./crear-vehiculos/crear-vehiculos.component";
 import { RegistroComponent } from "./registro/registro.component";
+import { LoginComponent } from "./login/login.component";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, MapaComponent, CrearVehiculosComponent, RegistroComponent],
+  imports: [RouterOutlet, MapaComponent, CrearVehiculosComponent, RegistroComponent, LoginComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
