@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import edu.uclm.esi.tysweb.bealquileres.dto.AsignarVehiculoRequestDto;
+import edu.uclm.esi.tysweb.bealquileres.dto.CambiarEstadoRequestDto;
 import edu.uclm.esi.tysweb.bealquileres.dto.SesionDto;
 import edu.uclm.esi.tysweb.bealquileres.dto.UbicarBicicletasRequestDto;
 import edu.uclm.esi.tysweb.bealquileres.dto.VehiculoDto;
@@ -60,6 +61,13 @@ public class VehiculoController {
     public void ubicar(@RequestBody UbicarBicicletasRequestDto request,
                        @RequestAttribute("sesion") SesionDto sesion) {
         this.service.ubicar(sesion.municipio(), request.estacionId(), request.vehiculoIds());
+    }
+
+    @PostMapping("/cambiarEstado")
+    public void cambiarEstado(@RequestBody CambiarEstadoRequestDto request,
+                              @RequestAttribute("sesion") SesionDto sesion) {
+        this.service.cambiarEstado(sesion.municipio(), request.vehiculoId(), request.estado(),
+                request.observaciones());
     }
 
     @GetMapping("/getVehiculos")

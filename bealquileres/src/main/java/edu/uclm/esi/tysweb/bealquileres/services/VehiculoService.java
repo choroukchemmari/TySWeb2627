@@ -16,12 +16,15 @@ import edu.uclm.esi.tysweb.bealquileres.dao.MunicipioDao;
 import edu.uclm.esi.tysweb.bealquileres.dao.VehiculoDao;
 import edu.uclm.esi.tysweb.bealquileres.dto.VehiculoDto;
 import edu.uclm.esi.tysweb.bealquileres.model.Estacion;
+import edu.uclm.esi.tysweb.bealquileres.model.EstadoVehiculo;
 import edu.uclm.esi.tysweb.bealquileres.model.Feature;
 import edu.uclm.esi.tysweb.bealquileres.model.Municipio;
 import edu.uclm.esi.tysweb.bealquileres.model.Vehiculo;
 
 @Service
 public class VehiculoService {
+
+    private static final int MAX_OBSERVACIONES = 500;
 
     @Autowired
     private VehiculoDao dao;
@@ -110,6 +113,47 @@ public class VehiculoService {
             v.setLongitud(punto.getLongitude());
         }
         this.dao.saveAll(vehiculos);
+    }
+
+    /**
+     * Gestionar bicicleta: cambia el estado de una bicicleta del municipio del
+     * funcionario y guarda las observaciones. Solo DISPONIBLE deja la bici activa.
+     */
+    @Transactional
+    public void cambiarEstado(String nombreMunicipio, Long vehiculoId, String estado, String observaciones) {
+        // 400: faltan datos
+        if (vehiculoId == null || estado == null || estado.isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hay que indicar la bicicleta y el estado");
+
+        // 406: estado desconocido u observaciones demasiado largas
+        EstadoVehiculo nuevoEstado;
+        try {
+            nuevoEstado = EstadoVehiculo.valueOf(estado.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
+                    "Estado no válido. Estados posibles: DISPONIBLE, PINCHADA, AVERIADA, ROBADA, BAJA");
+        }
+        if (observaciones != null && observaciones.length() > MAX_OBSERVACIONES)
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
+                    "Las observaciones admiten como máximo " + MAX_OBSERVACIONES + " caracteres");
+
+        // 409: precondición: el municipio debe estar cargado
+        Municipio municipio = this.municipioDao.findByName(nombreMunicipio);
+        if (municipio == null)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El municipio no está cargado");
+
+        // 404: la bicicleta no existe
+        Vehiculo vehiculo = this.dao.findById(vehiculoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "La bicicleta no existe"));
+
+        // 403: la bicicleta es de otro municipio (o no está asignada a ninguno)
+        if (vehiculo.getMunicipio() == null || !vehiculo.getMunicipio().getId().equals(municipio.getId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La bicicleta no pertenece a su municipio");
+
+        vehiculo.setEstado(nuevoEstado);
+        vehiculo.setObservaciones(observaciones);
+        vehiculo.setActivo(nuevoEstado == EstadoVehiculo.DISPONIBLE);
+        this.dao.save(vehiculo);
     }
 
     public List<VehiculoDto> getVehiculos() {

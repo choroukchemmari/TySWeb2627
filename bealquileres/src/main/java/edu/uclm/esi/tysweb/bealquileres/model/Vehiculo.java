@@ -1,6 +1,9 @@
 package edu.uclm.esi.tysweb.bealquileres.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,6 +32,13 @@ public class Vehiculo {
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "estacion_id", nullable = true)
     private Estacion estacion;
+
+    // Estado de la bicicleta y observaciones del funcionario (pinchada, robada...)
+    @Enumerated(EnumType.STRING)
+    private EstadoVehiculo estado = EstadoVehiculo.DISPONIBLE;
+
+    @Column(length = 500)
+    private String observaciones;
 
     public Long getId() {
         return id;
@@ -96,5 +106,22 @@ public class Vehiculo {
 
     public void setEstacion(Estacion estacion) {
         this.estacion = estacion;
+    }
+
+    public EstadoVehiculo getEstado() {
+        // Las bicicletas creadas antes de existir este campo no tienen estado guardado
+        return this.estado != null ? this.estado : EstadoVehiculo.DISPONIBLE;
+    }
+
+    public void setEstado(EstadoVehiculo estado) {
+        this.estado = estado;
+    }
+
+    public String getObservaciones() {
+        return observaciones;
+    }
+
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
     }
 }
