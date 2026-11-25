@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ComprasService, Prerreserva } from '../services/compras.service';
@@ -16,6 +16,7 @@ declare let Stripe: any;
 export class ComprarBicicletasComponent {
 
   private compras = inject(ComprasService);
+  private cdr = inject(ChangeDetectorRef);
 
   cantidad = 1;
   prerreserva?: Prerreserva;
@@ -50,12 +51,11 @@ export class ComprarBicicletasComponent {
 
   // Paso 3: formulario de tarjeta de Stripe (los datos van directamente a Stripe, no a nuestros servidores)
   private mostrarFormulario() {
-    // Se espera a que Angular pinte el <div id="card-element"> antes de montar el formulario
-    setTimeout(() => {
-      this.stripe = Stripe(environment.stripePublicKey);
-      this.card = this.stripe.elements().create('card');
-      this.card.mount('#card-element');
-    });
+    // Se obliga a Angular a pintar el <div id="card-element"> antes de montar el formulario
+    this.cdr.detectChanges();
+    this.stripe = Stripe(environment.stripePublicKey);
+    this.card = this.stripe.elements().create('card');
+    this.card.mount('#card-element');
   }
 
   pagar() {
@@ -67,6 +67,7 @@ export class ComprarBicicletasComponent {
         if (respuesta.error) {
           this.mostrar(respuesta.error.message, true);
           this.pagando = false;
+          this.cdr.detectChanges();
           return;
         }
         if (respuesta.paymentIntent.status === 'succeeded') {
@@ -91,6 +92,7 @@ export class ComprarBicicletasComponent {
   private limpiarFormulario() {
     this.card?.destroy();
     this.card = undefined;
+    this.stripe = undefined;
     this.prerreserva = undefined;
     this.idTransaccion = undefined;
     this.pagando = false;
